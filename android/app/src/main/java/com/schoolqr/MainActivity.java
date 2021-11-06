@@ -1,4 +1,4 @@
-package com.1337qr;
+package com.schoolqr;
 
 import android.os.Bundle;
 

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "1337-qr",
-    "slug": "1337-qr",
+    "name": "schoolQR",
+    "slug": "schoolQR",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
     ]
   },
-  "name": "1337-qr"
+  "name": "schoolQR"
 }

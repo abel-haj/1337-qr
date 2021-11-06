@@ -1,4 +1,4 @@
-rootProject.name = '1337qr'
+rootProject.name = 'schoolQR'
 
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute().text.trim(), "../scripts/autolinking.gradle");
 useExpoModules()

@@ -130,7 +130,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.1337qr"
+        applicationId "com.schoolqr"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "1337qr.app"
-               BlueprintName = "1337qr"
-               ReferencedContainer = "container:1337qr.xcodeproj">
+               BuildableName = "schoolQR.app"
+               BlueprintName = "schoolQR"
+               ReferencedContainer = "container:schoolQR.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "1337qrTests.xctest"
-               BlueprintName = "1337qrTests"
-               ReferencedContainer = "container:1337qr.xcodeproj">
+               BuildableName = "schoolQRTests.xctest"
+               BlueprintName = "schoolQRTests"
+               ReferencedContainer = "container:schoolQR.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "1337qr.app"
-            BlueprintName = "1337qr"
-            ReferencedContainer = "container:1337qr.xcodeproj">
+            BuildableName = "schoolQR.app"
+            BlueprintName = "schoolQR"
+            ReferencedContainer = "container:schoolQR.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "1337qr.app"
-            BlueprintName = "1337qr"
-            ReferencedContainer = "container:1337qr.xcodeproj">
+            BuildableName = "schoolQR.app"
+            BlueprintName = "schoolQR"
+            ReferencedContainer = "container:schoolQR.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
