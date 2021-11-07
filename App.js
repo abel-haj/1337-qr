@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
 
+import LoginScreen from './screens/auth';
 import HomeScreen from './screens/home';
 import ScanScreen from './screens/scan';
 
@@ -12,8 +13,12 @@ const App = () => {
 	return (
     <NavigationContainer>
       <Stack.Navigator
-				initialRouteName="Home"
+				initialRouteName="Login"
 				screenOptions={{ headerShown: true, tabBarVisible: false,}} >
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+        />
         <Stack.Screen
           name="Home"
           component={HomeScreen}
