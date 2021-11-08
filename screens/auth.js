@@ -1,56 +1,61 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Alert,
   Linking,
   Dimensions,
-  LayoutAnimation,
   Text,
   View,
-  StatusBar,
   StyleSheet,
   TouchableOpacity,
 	SafeAreaView,
 	ScrollView,
-	Button,
-	Image,
 } from 'react-native';
-import { WebBrowser } from 'expo';
-// import { BarCodeScanner, Permissions } from 'expo';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import OAuthManager from 'react-native-oauth';
+import { config } from '../config'
 
-const {width, height} = Dimensions.get('screen');
+const { width, height } = Dimensions.get('screen');
 
 const Auth = ({ navigation, route }) => {
+  const [userData, setUserData] = useState({});
+  const [accessToken, setAccessToken] = useState('');
 
   useEffect(() => {
+    const urlEvent = Linking.addEventListener("url", handleOpenUrl);
+    Linking.getInitialURL().then(url => {
+      if (url) handleRedirectUri(url);
+    });
+    return () => urlEvent.remove();
   }, []);
 
-	openAuthSessionAsync = async () => {
-    // const redirect = await Linking.getInitialURL('/');
-    // const result = await WebBrowser.openAuthSessionAsync(
-    //   `https://api.intra.42.fr/oauth/authorize?client_id=a4a8147ef5789c8e043553950ae9927beb1d50d5f2186f1ce774448ad631fb18&redirect_uri=exp%3A%2F%2Fgx-jb9.anonymous.schoolqr.exp.direct&response_type=code`
-		// );
-		// //Now if the user authorized the app result will store the code you can perform the handshake with to get an access token for that user. I have a simple check to see if the user already exists in my backend and then send info to the store with a helper function
-		// console.log('REDIRECT', redirect);
-		// console.log('RESULT', result);
+  const handleOpenUrl = (url) => {
+    handleRedirectUri(url);
+  }
 
-		const manager = new OAuthManager('firestackexample');
-		console.log('HERE ', manager);
+  const handleRedirectUri = (urlString) => {
+    const url = new URL(urlString, true);
+    const { code } = url.query;
 
-		manager.addProvider({
-			'intra42': {
-				auth_version: '2.0',
-				authorize_url: 'https://api.intra.42.fr/oauth/authorize',
-				access_token_url: 'https://api.intra.42.fr/oauth/token',
-				callback_url: ({app_name}) => `${app_name}://oauth`,
-			}
-		});
+    console.log("App url: " + url);
+    if (!code) return;
 
-		manager.authorize('intra42', {scopes: 'public'})
-			.then(resp => console.log(resp))
-			.catch(err => console.log('There was an error', err));
-	}
+    return fetch(config.apiAuthorizationUrl, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code })
+    }).then((resp) => resp.json())
+      .then(({ access_token, data }) => {
+        setAccessToken(access_token);
+        setUserData(data);
+      })
+      .catch(err => {
+        console.warn("Something went wrong", err);
+      });
+  }
+
+  const openAuthSessionAsync = async () => {
+    Linking.openURL(config.apiAuthenticationUrl);
+  }
 
 	return (
 	<SafeAreaView>
@@ -59,7 +64,7 @@ const Auth = ({ navigation, route }) => {
 				{/* SCAN BUTTON */}
 				<TouchableOpacity
 					style={{
-						marginVertical: 7.5,
+						marginVertical: 10,
 						paddingVertical: 10,
 						paddingHorizontal: 20,
 						backgroundColor: '#222',
@@ -73,7 +78,25 @@ const Auth = ({ navigation, route }) => {
 					}
 					activeOpacity={ 0.7 }
 				>
-					<Text style={{ color: 'white', fontSize: 20, }} >LOGIN</Text>
+					<Text style={{ color: 'white', fontSize: 20, }}>LOGIN</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity
+					style={{
+						marginVertical: 10,
+						paddingVertical: 10,
+						paddingHorizontal: 20,
+						backgroundColor: '#222',
+						borderRadius: 5,
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}
+					onPress={
+						navigation.navigate('Home')
+					}
+					activeOpacity={ 0.7 }
+				>
+					<Text style={{ color: 'white', fontSize: 20, }}>HOME</Text>
 				</TouchableOpacity>
 			</View>
 		</ScrollView>

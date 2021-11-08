@@ -90,6 +90,9 @@ const Home = ({ navigation, route }) => {
 						style={[styles.points, {
 							marginLeft: 10,
 							marginRight: 7.5,
+							alignItems: 'center',
+							justifyContent: 'center',
+							flexDirection: 'column',
 						}]}
 					>
 						{/* <Image source={} /> */}
