@@ -5,16 +5,18 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
 
+// import LoginScreen from './screens/rationalauth';
 import LoginScreen from './screens/auth';
 import HomeScreen from './screens/home';
 import ScanScreen from './screens/scan';
 
 const App = () => {
-	return (
+  return (
     <NavigationContainer>
       <Stack.Navigator
-				initialRouteName="Login"
-				screenOptions={{ headerShown: true, tabBarVisible: false,}} >
+        initialRouteName="Login"
+        screenOptions={{ headerShown: true, tabBarVisible: false }}
+      >
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -24,12 +26,12 @@ const App = () => {
           component={HomeScreen}
         />
         <Stack.Screen
-					name="Scan"
-					component={ScanScreen}
-				/>
+          name="Scan"
+          component={ScanScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
-	)
+  );
 }
 
 export default App;
