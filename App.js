@@ -1,21 +1,19 @@
 import React from 'react';
-
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
 
-// import LoginScreen from './screens/rationalauth';
 import LoginScreen from './screens/auth';
 import HomeScreen from './screens/home';
 import ScanScreen from './screens/scan';
 
-const App = () => {
+const App = ({route}) => {
   return (
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="Login"
-        screenOptions={{ headerShown: true, tabBarVisible: false }}
+        screenOptions={{ headerShown: true, tabBarVisible: false, }}
       >
         <Stack.Screen
           name="Login"

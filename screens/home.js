@@ -1,27 +1,44 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Alert,
-  Linking,
   Dimensions,
-  LayoutAnimation,
   Text,
   View,
-  StatusBar,
   StyleSheet,
   TouchableOpacity,
 	SafeAreaView,
 	ScrollView,
-	Button,
 	Image,
 } from 'react-native';
-// import { BarCodeScanner, Permissions } from 'expo';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import { useIsFocused } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store'; 
+import axios from 'axios';
+// import QRCode from 'react-native-qrcode-svg';
+import { QRCode } from 'react-native-custom-qr-codes-expo';
 
+import Images from '../assets/Images';
 const {width, height} = Dimensions.get('screen');
 
 const Home = ({ navigation, route }) => {
 	const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
+	const isFocused = useIsFocused();
+	const name = '';
+	const image = '';
+
+  useEffect(() => {
+		(async () => {
+			let logged = await SecureStore.getItemAsync('logged');
+			if (logged == 'true') {
+				// GET DATA
+				name = await SecureStore.getItemAsync('name');
+				image = await SecureStore.getItemAsync('image');
+			} else {
+				// LOG SCREEN
+				// navigation.navigate('Login');
+			}
+		})();
+  }, [isFocused]);
 
   useEffect(() => {
     (async () => {
@@ -37,16 +54,6 @@ const Home = ({ navigation, route }) => {
     return <Text>No access to camera</Text>;
   }
 
-	// if (route.params) {
-	// 	if (route.params.barcodeData) {
-	// 		console.log('HOME 1', route.params.barcodeData);
-	// 	}
-	// 	else
-	// 		console.log('HOME 2', route.params);
-	// 	// alert('found some data! check the log');
-	// 	// console.log('HOME', JSON.parse(route.params.barcodeData, null, 2));
-	// }
-
 	return (
 	<SafeAreaView>
 		<ScrollView>
@@ -60,22 +67,29 @@ const Home = ({ navigation, route }) => {
 						marginBottom: 5,
 						backgroundColor: 'grey',
 						borderRadius: 200,
+						overflow: 'hidden',
 					}}
 					>
-						{/* <Image /> */}
+						<Image resizeMode='contain' source={{}}
+							style={{ width: '100%', height: '100%', backgroundColor: 'lightblue', }} />
 				</View>
-				<Text style={{ marginTop: 5, marginBottom: 7.5, color: '#333', fontSize: 20, }}>{ 'John Doe' }</Text>
+				<Text style={{ marginTop: 5, marginBottom: 7.5, color: '#333', fontSize: 20, }}>{ name }</Text>
 
 				{/* BARCODE */}
-				<View
-					style={{
-						width: 200,
-						height: 200,
-						marginVertical: 7.5,
-						backgroundColor: 'grey',
-					}}
-					>
-				</View>
+				<QRCode
+					size={200}
+					content='{id: "striasdfasdfasdfasdfng"}'
+					padding={1.5}
+				// <View
+					// style={{
+					// 	width: 500,
+					// 	height: 500,
+					// }}
+				// >
+					// <Image style={{ width: '100%', height: '100%', }}
+						// resizeMode='contain' source={ Images.qr_placeholder_png }/>
+				// </View>
+				/>
 
 				{/* POINTS */}
 				<View
@@ -83,28 +97,31 @@ const Home = ({ navigation, route }) => {
 						marginVertical: 7.5,
 						flexDirection: 'row',
 						justifyContent: 'space-between',
-						// backgroundColor: 'blue',
 					}}
 				>
 					<View
 						style={[styles.points, {
 							marginLeft: 10,
 							marginRight: 7.5,
-							alignItems: 'center',
-							justifyContent: 'center',
-							flexDirection: 'column',
 						}]}
 					>
-						{/* <Image source={} /> */}
+						<Image style={{ width: '50%', height: '50%', }}
+							resizeMode='contain' source={ Images.connections_png } />
 						<Text style={{ color: '#000', fontSize: 15, }}> Connections </Text>
 						<Text style={{ color: '#000', fontSize: 35, }}> { '0' } </Text>
 					</View>
+
 					<View
 						style={[styles.points, {
 							marginLeft: 7.5,
 							marginRight: 10,
 						}]}
-					></View>
+					>
+						<Image style={{ width: '50%', height: '50%', }}
+							resizeMode='contain' source={ Images.points_png } />
+						<Text style={{ color: '#000', fontSize: 15, }}> Points </Text>
+						<Text style={{ color: '#000', fontSize: 35, }}> { '0' } </Text>
+					</View>
 				</View>
 
 				{/* SCAN BUTTON */}
@@ -120,6 +137,26 @@ const Home = ({ navigation, route }) => {
 					}}
 					onPress={() => {
 						navigation.navigate('Scan');
+					}}
+					activeOpacity={ 0.7 }
+				>
+					<Text style={{ color: 'white', fontSize: 20, }} >SCAN QR CODE</Text>
+				</TouchableOpacity>
+
+				{/* LOGOUT BUTTON */}
+				<TouchableOpacity
+					style={{
+						marginVertical: 7.5,
+						paddingVertical: 10,
+						paddingHorizontal: 20,
+						backgroundColor: '#222',
+						borderRadius: 5,
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}
+					onPress={() => {
+						SecureStore.deleteItemAsync('logged');
+						navigation.navigate('Login');
 					}}
 					activeOpacity={ 0.7 }
 				>
@@ -141,14 +178,18 @@ const styles = StyleSheet.create({
 		// margin: 10,
 		// justifyContent: 'center',
 		alignItems: 'center',
+		backgroundColor: '#eee',
   },
 	points: {
 		width: width / 2 - 17.5,
 		height: width / 2 - 17.5,
+		paddingTop: 5,
 		marginHorizontal: 10,
 		borderRadius: 5,
-		alignItems: 'center',
 		backgroundColor: '#fff',
+		alignItems: 'center',
+		justifyContent: 'center',
+		flexDirection: 'column',
 
 		shadowColor: "#000", elevation: 4,
 		shadowOffset: { width: 0, height: 2, },
