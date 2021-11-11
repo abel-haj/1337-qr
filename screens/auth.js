@@ -67,15 +67,15 @@ coalition : 6189c94e4a0aea581a39f727
 			Alert.alert("Enter password!");
 			return;
 		}
-		Alert.alert('STEP 1');
+		// Alert.alert('STEP 1');
 
-		axios.post(host + 'students/fetch/password/', data)
+		await axios.post(host + 'students/fetch/password/', data)
 		.then(async (response) => {
 			Alert.alert('STEP 2');
 			// LOG
 			console.log('RESULT IS HERE')
 			console.log(JSON.stringify(response.data, null, 2));
-	
+
 			// LOGIN
 			if (response.data.success == true) {
 				Alert.alert('STEP 3');
@@ -90,18 +90,18 @@ coalition : 6189c94e4a0aea581a39f727
 					// 	connections: response.data.data.connections,
 					// 	points: response.data.data.points,
 					// });
-					
+
 					await SecureStore.setItemAsync('logged', 'true');
 					await SecureStore.setItemAsync('id', response.data.data._id);
+					await SecureStore.setItemAsync('intraid', response.data.data.intra_id.toString());
+					await SecureStore.setItemAsync('login', response.data.data.login.toString());
 					await SecureStore.setItemAsync('name', response.data.data.name);
 					await SecureStore.setItemAsync('image', response.data.data.image_url);
-					// await SecureStore.setItemAsync('intraid', response.data.data.intra_id);
-					// await SecureStore.setItemAsync('login', response.data.data.login);
-					// await SecureStore.setItemAsync('coalition', response.data.data.coalition);
-					// await SecureStore.setItemAsync('connections', response.data.data.connections);
-					// await SecureStore.setItemAsync('points', response.data.data.points);
-					console.log('---------------', response.data.data.intra_id);
-					
+					await SecureStore.setItemAsync('connections', response.data.data.connections.toString());
+					await SecureStore.setItemAsync('points', response.data.data.points.toString());
+					await SecureStore.setItemAsync('coalition', response.data.data.coalition.toString());
+					// console.log('---------------', response.data.data.points);
+
 					navigation.navigate('Home');
 				} else if (response.data.success == false) {
 				Alert.alert('STEP 4');
@@ -139,27 +139,25 @@ coalition : 6189c94e4a0aea581a39f727
 						}}>
 						<View style={styles.centeredView}>
 							<View style={styles.modalView}>
-								<Text style={{}}>
-									Register first on
-								</Text>
-								<TouchableOpacity
-									onPress={() => {
-										Linking.canOpenURL(global.host)
-										.then((yes) => {
-											if (yes) {
-												console.log('OPENING', global.host);
-												Linking.openURL(global.host);
-											}
-											else
-												Alert.alert(`Cannot open this url! ${global.host}`);
-										});
-									}}
-								>
-									<Text style={[{}, {textDecorationLine: "underline",}]}>HERE</Text>
-								</TouchableOpacity>
 								<Text style={styles.modalText}>
-									using your intra email to get your password
+								<Text>
+									Register first on {''}
 								</Text>
+									<Text
+										onPress={() => {
+											Linking.canOpenURL(global.host)
+											.then((yes) => {
+												if (yes) {
+													console.log('OPENING', global.host);
+													Linking.openURL(global.host);
+												}
+												else
+													Alert.alert(`Cannot open this url! ${global.host}`);
+											});
+										}} style={{ textDecorationLine: "underline", fontWeight: 'bold' }}>HERE</Text>
+								<Text style={{}}>
+								{''} using your intra email to get your password
+								</Text></Text>
 								<TouchableOpacity
 									style={[styles.button, styles.buttonClose]}
 									onPress={() => setModalVisible(!modalVisible)}>
@@ -323,7 +321,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
+    padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {

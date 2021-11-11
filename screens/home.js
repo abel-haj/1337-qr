@@ -24,6 +24,11 @@ const Home = ({ navigation, route }) => {
 	const isFocused = useIsFocused();
 	const [name, setName] = useState('');
 	const [image, setImage] = useState('');
+	const [points, setPoints] = useState(0);
+	const [conns, setConns] = useState(0);
+	const [ID, setID] = useState('');
+	const [intraID, setIntraID] = useState('');
+	// const [, set] = useState(0);
 
   useEffect(() => {
 		(async () => {
@@ -32,10 +37,14 @@ const Home = ({ navigation, route }) => {
 				// GET DATA
 				SecureStore.getItemAsync('name').then(result => setName(result));
 				SecureStore.getItemAsync('image').then(result => setImage(result));
+				SecureStore.getItemAsync('points').then(result => setPoints(result));
+				SecureStore.getItemAsync('connections').then(result => setConns(result));
+				SecureStore.getItemAsync('id').then(result => setID(result));
+				SecureStore.getItemAsync('intraid').then(result => setIntraID(result));
 				console.log('NAME IS', name);
 			} else {
 				// LOG SCREEN
-				// navigation.navigate('Login');
+				navigation.navigate('Login');
 			}
 		})();
   }, [isFocused]);
@@ -78,17 +87,8 @@ const Home = ({ navigation, route }) => {
 				{/* BARCODE */}
 				<QRCode
 					size={200}
-					content='{id: "striasdfasdfasdfasdfng"}'
+					content={''}
 					padding={1.5}
-				// <View
-					// style={{
-					// 	width: 500,
-					// 	height: 500,
-					// }}
-				// >
-					// <Image style={{ width: '100%', height: '100%', }}
-						// resizeMode='contain' source={ Images.qr_placeholder_png }/>
-				// </View>
 				/>
 
 				{/* POINTS */}
@@ -108,7 +108,7 @@ const Home = ({ navigation, route }) => {
 						<Image style={{ width: '50%', height: '50%', }}
 							resizeMode='contain' source={ Images.connections_png } />
 						<Text style={{ color: '#000', fontSize: 15, }}> Connections </Text>
-						<Text style={{ color: '#000', fontSize: 35, }}> { '0' } </Text>
+						<Text style={{ color: '#000', fontSize: 35, }}> { conns } </Text>
 					</View>
 
 					<View
@@ -120,7 +120,7 @@ const Home = ({ navigation, route }) => {
 						<Image style={{ width: '50%', height: '50%', }}
 							resizeMode='contain' source={ Images.points_png } />
 						<Text style={{ color: '#000', fontSize: 15, }}> Points </Text>
-						<Text style={{ color: '#000', fontSize: 35, }}> { '0' } </Text>
+						<Text style={{ color: '#000', fontSize: 35, }}> { points } </Text>
 					</View>
 				</View>
 
