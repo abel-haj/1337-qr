@@ -12,9 +12,8 @@ import {
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useIsFocused } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store'; 
-import axios from 'axios';
-// import QRCode from 'react-native-qrcode-svg';
 import { QRCode } from 'react-native-custom-qr-codes-expo';
+import axios from 'axios';
 
 import Images from '../assets/Images';
 const {width, height} = Dimensions.get('screen');
@@ -23,16 +22,17 @@ const Home = ({ navigation, route }) => {
 	const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
 	const isFocused = useIsFocused();
-	const name = '';
-	const image = '';
+	const [name, setName] = useState('');
+	const [image, setImage] = useState('');
 
   useEffect(() => {
 		(async () => {
 			let logged = await SecureStore.getItemAsync('logged');
 			if (logged == 'true') {
 				// GET DATA
-				name = await SecureStore.getItemAsync('name');
-				image = await SecureStore.getItemAsync('image');
+				SecureStore.getItemAsync('name').then(result => setName(result));
+				SecureStore.getItemAsync('image').then(result => setImage(result));
+				console.log('NAME IS', name);
 			} else {
 				// LOG SCREEN
 				// navigation.navigate('Login');
@@ -70,7 +70,7 @@ const Home = ({ navigation, route }) => {
 						overflow: 'hidden',
 					}}
 					>
-						<Image resizeMode='contain' source={{}}
+						<Image resizeMode='cover' source={{ uri: image }}
 							style={{ width: '100%', height: '100%', backgroundColor: 'lightblue', }} />
 				</View>
 				<Text style={{ marginTop: 5, marginBottom: 7.5, color: '#333', fontSize: 20, }}>{ name }</Text>
@@ -154,13 +154,13 @@ const Home = ({ navigation, route }) => {
 						alignItems: 'center',
 						justifyContent: 'center',
 					}}
-					onPress={() => {
-						SecureStore.deleteItemAsync('logged');
+					onPress={async () => {
+						await SecureStore.deleteItemAsync('logged');
 						navigation.navigate('Login');
 					}}
 					activeOpacity={ 0.7 }
 				>
-					<Text style={{ color: 'white', fontSize: 20, }} >SCAN QR CODE</Text>
+					<Text style={{ color: 'white', fontSize: 20, }} >LOGOUT</Text>
 				</TouchableOpacity>
 			</View>
 		</ScrollView>

@@ -32,13 +32,21 @@ const Auth = ({ navigation, route }) => {
 	// REDIRECT TO HOME IF LOGGED
 	useEffect(() => {
 		(async () => {
-			let result = await SecureStore.getItemAsync(key);
+			let result = await SecureStore.getItemAsync('logged');
 			if (result == 'true') {
 				navigation.navigate('Home');
 			}
 		})();
-	}, [isFocused])
+	}, [isFocused]);
 
+	const storeObject = object => Promise.all(
+		Object.keys(object).map(key => {
+			const value = JSON.stringify(object[key]);
+
+			return SecureStore.setItemAsync(key, value);
+		})
+	);
+	
 /*
 _id : 6189c94e4a0aea581a39f729
 login : "mel-omar"
@@ -51,7 +59,7 @@ flag_priority : 1
 points : 0
 coalition : 6189c94e4a0aea581a39f727
 */
-	async function log_user() {
+	const log_user = async () => {
 		let data = {password: pass};
 		console.log('PASSWORD', pass);
 
@@ -59,43 +67,61 @@ coalition : 6189c94e4a0aea581a39f727
 			Alert.alert("Enter password!");
 			return;
 		}
-		
-		try {
-			setWait(true);
-			
-			const response = await axios.post(host + 'students/fetch/password/', data);
+		Alert.alert('STEP 1');
+
+		axios.post(host + 'students/fetch/password/', data)
+		.then(async (response) => {
+			Alert.alert('STEP 2');
 			// LOG
 			console.log('RESULT IS HERE')
-			console.log(response);
-			
+			console.log(JSON.stringify(response.data, null, 2));
+	
 			// LOGIN
-			if (response.success == true) {
-				console.log('SUCCESS', response);
-				await SecureStore.setItemAsync('logged', 'true');
-				await SecureStore.setItemAsync('id', response.data._id);
-				await SecureStore.setItemAsync('intraid', response.data.intra_id);
-				await SecureStore.setItemAsync('login', response.data.login);
-				await SecureStore.setItemAsync('name', response.data.name);
-				await SecureStore.setItemAsync('image', response.data.image_url);
-				await SecureStore.setItemAsync('coalition', response.data.coalition);
-				await SecureStore.setItemAsync('connections', response.data.connections);
-				await SecureStore.setItemAsync('points', response.data.points);
-				
-				navigation.navigate('Home');
-			} else if (response.success == false) {
+			if (response.data.success == true) {
+				Alert.alert('STEP 3');
+				// await storeObject({
+					// 	logged: 'true',
+					// 	id: response.data.data._id,
+					// 	intraid: response.data.data.intra_id,
+					// 	login: response.data.data.login,
+					// 	name: response.data.data.name,
+					// 	image: response.data.data.image_url,
+					// 	coalition: response.data.data.coalition,
+					// 	connections: response.data.data.connections,
+					// 	points: response.data.data.points,
+					// });
+					
+					await SecureStore.setItemAsync('logged', 'true');
+					await SecureStore.setItemAsync('id', response.data.data._id);
+					await SecureStore.setItemAsync('name', response.data.data.name);
+					await SecureStore.setItemAsync('image', response.data.data.image_url);
+					// await SecureStore.setItemAsync('intraid', response.data.data.intra_id);
+					// await SecureStore.setItemAsync('login', response.data.data.login);
+					// await SecureStore.setItemAsync('coalition', response.data.data.coalition);
+					// await SecureStore.setItemAsync('connections', response.data.data.connections);
+					// await SecureStore.setItemAsync('points', response.data.data.points);
+					console.log('---------------', response.data.data.intra_id);
+					
+					navigation.navigate('Home');
+				} else if (response.data.success == false) {
+				Alert.alert('STEP 4');
 				console.log('FALURE', response);
-				Alert.alert(response.error)
+				Alert.alert(response.error);
 			}
 
 			// FEEDBACK
-			setPass('');
-			setWait(false);
-		}
-		catch(err) {
+			// setPass('');
+		})
+		.catch(err => {
 			console.log('EXCEPTION');
-			console.log(err);
-		}
-		Alert.alert(pass);
+			console.log(JSON.stringify(err, null, 2));
+
+			Alert.alert('An error encountered!');
+			setWait(false);
+		})
+		.finally(() => {
+			setWait(false);
+		});
 	}
 
 	return (
@@ -129,7 +155,7 @@ coalition : 6189c94e4a0aea581a39f727
 										});
 									}}
 								>
-									<Text style={[{}, {textDecorationLine: "underline",}]}>here</Text>
+									<Text style={[{}, {textDecorationLine: "underline",}]}>HERE</Text>
 								</TouchableOpacity>
 								<Text style={styles.modalText}>
 									using your intra email to get your password
@@ -161,24 +187,28 @@ coalition : 6189c94e4a0aea581a39f727
 								secureTextEntry={true}
 								textContentType='password'
 								selectionColor='grey'
-								onChangeText={text => setPass(text)}
+								defaultValue={pass}
+								onChangeText={(text) => { setPass(text);}}
 							/>
 						</View>
 
 						{/* LOGIN BUTTON */}
 						<TouchableOpacity style={styles.loginButton}
 							onPress={() => {
-								!wait && log_user()
-								console.log(wait);
+								console.log('WAIT STATE', wait);
+								!wait && log_user();
+								// console.log(wait);
 							}}
-						>
+							>
 							<Text style={styles.loginButtonText}>Login</Text>
 						</TouchableOpacity>
 
 						{/* MODAL BUTTON */}
 						<TouchableOpacity
 							onLongPress={() => {
-								navigation.navigate('Home');
+								// navigation.navigate('Home');
+								setWait(false);
+								console.log(wait);
 							}}
 							onPress={() => {
 								setModalVisible(true);
