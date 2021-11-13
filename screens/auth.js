@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useIsFocused } from '@react-navigation/native';
-import * as SecureStore from 'expo-secure-store'; 
+import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 
 const { width, height } = Dimensions.get('screen');
@@ -62,52 +62,40 @@ coalition : 6189c94e4a0aea581a39f727
 	const log_user = async () => {
 		let data = {password: pass};
 		console.log('PASSWORD', pass);
+		console.log('URL' , host + '/students/fetch/password/');
 
 		if (pass == "") {
 			Alert.alert("Enter password!");
 			return;
 		}
-		// Alert.alert('STEP 1');
 
-		await axios.post(host + 'students/fetch/password/', data)
+		await axios.post(host + '/students/fetch/password/', data)
 		.then(async (response) => {
-			Alert.alert('STEP 2');
-			// LOG
-			console.log('RESULT IS HERE')
-			console.log(JSON.stringify(response.data, null, 2));
+
+			// // LOG
+			// console.log('RESULT IS HERE')
+			// console.log(JSON.stringify(response.data, null, 2));
 
 			// LOGIN
 			if (response.data.success == true) {
-				Alert.alert('STEP 3');
-				// await storeObject({
-					// 	logged: 'true',
-					// 	id: response.data.data._id,
-					// 	intraid: response.data.data.intra_id,
-					// 	login: response.data.data.login,
-					// 	name: response.data.data.name,
-					// 	image: response.data.data.image_url,
-					// 	coalition: response.data.data.coalition,
-					// 	connections: response.data.data.connections,
-					// 	points: response.data.data.points,
-					// });
 
-					await SecureStore.setItemAsync('logged', 'true');
-					await SecureStore.setItemAsync('id', response.data.data._id);
-					await SecureStore.setItemAsync('intraid', response.data.data.intra_id.toString());
-					await SecureStore.setItemAsync('login', response.data.data.login.toString());
-					await SecureStore.setItemAsync('name', response.data.data.name);
-					await SecureStore.setItemAsync('image', response.data.data.image_url);
-					await SecureStore.setItemAsync('connections', response.data.data.connections.toString());
-					await SecureStore.setItemAsync('points', response.data.data.points.toString());
-					await SecureStore.setItemAsync('coalition', response.data.data.coalition.toString());
-					// console.log('---------------', response.data.data.points);
+				await SecureStore.setItemAsync('logged', 'true');
+				await SecureStore.setItemAsync('id', response.data.data._id);
+				await SecureStore.setItemAsync('intraid', response.data.data.intra_id.toString());
+				await SecureStore.setItemAsync('login', response.data.data.login.toString());
+				await SecureStore.setItemAsync('name', response.data.data.name);
+				await SecureStore.setItemAsync('image', response.data.data.image_url);
+				await SecureStore.setItemAsync('connections', response.data.data.connections.toString());
+				await SecureStore.setItemAsync('points', response.data.data.points.toString());
+				await SecureStore.setItemAsync('coalition', response.data.data.coalition.toString());
+				// console.log('---------------', response.data.data.points);
 
-					navigation.navigate('Home');
-				} else if (response.data.success == false) {
-				Alert.alert('STEP 4');
+				navigation.navigate('Home');
+			} else if (response.data.success == false) {
 				console.log('FALURE', response);
 				Alert.alert(response.error);
-			}
+			} else
+				Alert.alert('WEIRD!', 'An unexpected error ocurred...');
 
 			// FEEDBACK
 			// setPass('');

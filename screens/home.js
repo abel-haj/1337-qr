@@ -13,6 +13,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useIsFocused } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store'; 
 import { QRCode } from 'react-native-custom-qr-codes-expo';
+import SvgQRCode from 'react-native-qrcode-svg';
 import axios from 'axios';
 
 import Images from '../assets/Images';
@@ -21,12 +22,13 @@ const {width, height} = Dimensions.get('screen');
 const Home = ({ navigation, route }) => {
 	const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
+	const [scanValue, setScanValue] = useState('null');
 	const isFocused = useIsFocused();
 	const [name, setName] = useState('');
 	const [image, setImage] = useState('');
 	const [points, setPoints] = useState(0);
 	const [conns, setConns] = useState(0);
-	const [ID, setID] = useState('');
+	const [ID, setID] = useState('null');
 	const [intraID, setIntraID] = useState('');
 	// const [, set] = useState(0);
 
@@ -39,9 +41,8 @@ const Home = ({ navigation, route }) => {
 				SecureStore.getItemAsync('image').then(result => setImage(result));
 				SecureStore.getItemAsync('points').then(result => setPoints(result));
 				SecureStore.getItemAsync('connections').then(result => setConns(result));
-				SecureStore.getItemAsync('id').then(result => setID(result));
+				SecureStore.getItemAsync('id').then(result => {setID(result); setScanValue(result)});
 				SecureStore.getItemAsync('intraid').then(result => setIntraID(result));
-				console.log('NAME IS', name);
 			} else {
 				// LOG SCREEN
 				navigation.navigate('Login');
@@ -84,10 +85,27 @@ const Home = ({ navigation, route }) => {
 				</View>
 				<Text style={{ marginTop: 5, marginBottom: 7.5, color: '#333', fontSize: 20, }}>{ name }</Text>
 
+				{/* SCAN BUTTON */}
+				<TouchableOpacity
+					style={styles.blackButton}
+					onPress={() => {
+						setScanValue('some value');
+					}}
+					activeOpacity={ 0.7 }
+				>
+					<Text style={{ color: 'white', fontSize: 20, }} >DEBUG</Text>
+				</TouchableOpacity>
+
 				{/* BARCODE */}
-				<QRCode
+				{/* <QRCode
 					size={200}
 					content={''}
+					padding={1.5}
+				/> */}
+				<SvgQRCode
+					size={200}
+					value={scanValue}
+					backgroundColor='#eee'
 					padding={1.5}
 				/>
 
@@ -126,15 +144,7 @@ const Home = ({ navigation, route }) => {
 
 				{/* SCAN BUTTON */}
 				<TouchableOpacity
-					style={{
-						marginVertical: 7.5,
-						paddingVertical: 10,
-						paddingHorizontal: 20,
-						backgroundColor: '#222',
-						borderRadius: 5,
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}
+					style={styles.blackButton}
 					onPress={() => {
 						navigation.navigate('Scan');
 					}}
@@ -145,15 +155,7 @@ const Home = ({ navigation, route }) => {
 
 				{/* LOGOUT BUTTON */}
 				<TouchableOpacity
-					style={{
-						marginVertical: 7.5,
-						paddingVertical: 10,
-						paddingHorizontal: 20,
-						backgroundColor: '#222',
-						borderRadius: 5,
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}
+					style={styles.blackButton}
 					onPress={async () => {
 						await SecureStore.deleteItemAsync('logged');
 						navigation.navigate('Login');
@@ -194,5 +196,14 @@ const styles = StyleSheet.create({
 		shadowColor: "#000", elevation: 4,
 		shadowOffset: { width: 0, height: 2, },
 		shadowOpacity: 0.23, shadowRadius: 2.62,
+	},
+	blackButton: {
+		marginVertical: 7.5,
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		backgroundColor: '#222',
+		borderRadius: 5,
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 });
