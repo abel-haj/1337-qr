@@ -94,12 +94,12 @@ coalition : 6189c94e4a0aea581a39f727
 				navigation.navigate('Home');
 			} else if (response.data.success == false) {
 				console.log('FALURE', response);
-				Alert.alert(response.error);
+				Alert.alert(response.data.error);
 			} else
 				Alert.alert('WEIRD!', 'An unexpected error ocurred...');
 
 			// FEEDBACK
-			// setPass('');
+			setPass('');
 		})
 		.catch(err => {
 			console.log('EXCEPTION');

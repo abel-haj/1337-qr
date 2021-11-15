@@ -9,9 +9,9 @@ import {
 	ScrollView,
 	Button,
 } from 'react-native';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+// import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useIsFocused } from '@react-navigation/native';
-import * as SecureStore from 'expo-secure-store'; 
+import * as SecureStore from 'expo-secure-store';
 import { Camera } from 'expo-camera';
 import axios from 'axios';
 
@@ -49,6 +49,10 @@ const Scan = ({ navigation }, props) => {
 		let response = await axios.post(host + '/student/scan/qrcode/', data)
 		// .then(response => {
 			console.log('RESPONSE', response.data);
+			if (response.data.success == false)
+				Alert.alert(response.data.error)
+			// else if (response.data.success == true)
+			// 	Alert.alert(response.data.data)
 		// })
 		// .catch(err => {
 		// 	console.log('EXCEPTION OCURRED', err);

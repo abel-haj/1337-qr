@@ -10,10 +10,10 @@ import {
 	Image,
 	Alert,
 } from 'react-native';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { Camera } from 'expo-camera';
 import { useIsFocused } from '@react-navigation/native';
-import * as SecureStore from 'expo-secure-store'; 
-import { QRCode } from 'react-native-custom-qr-codes-expo';
+import * as SecureStore from 'expo-secure-store';
+// import { QRCode } from 'react-native-custom-qr-codes-expo';
 import SvgQRCode from 'react-native-qrcode-svg';
 import axios from 'axios';
 
@@ -65,7 +65,7 @@ const Home = ({ navigation, route }, props) => {
 
 			} else {
 				
-				navigation.pop(props.props.componentId);
+				navigation.navigate('Login');
 				
 			}
 
@@ -85,7 +85,7 @@ const Home = ({ navigation, route }, props) => {
 
   useEffect(() => {
     (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
@@ -111,7 +111,7 @@ const Home = ({ navigation, route }, props) => {
 			.catch((error) => {
 				// recursive
 				// loadData();
-				logIt('LOAD MESSAGES CATCH', error);
+				console.log('LOAD MESSAGES CATCH', error);
 			});
 		} else
 			console.log('WHOOPS', id);
