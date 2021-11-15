@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
 	Alert,
 	Dimensions,
@@ -11,36 +11,54 @@ import {
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useIsFocused } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store'; 
+import { Camera } from 'expo-camera';
 import axios from 'axios';
 
 const {width, height} = Dimensions.get('screen');
+import { ScanedContext } from './ScanedContext';
 import '../assets/global';
 
-const Scan = ({ navigation }) => {
+const Scan = ({ navigation }, props) => {
 	const [hasPermission, setHasPermission] = useState(null);
 	const [scanned, setScanned] = useState(false);
+  const [sc, setSc] = useContext(ScanedContext);
 	const canScan = useRef(true);
 	const isFocused = useIsFocused();
 	
 	useEffect(() => {
 		(async () => {
-			const { status } = await BarCodeScanner.requestPermissionsAsync();
+			const { status } = await Camera.requestCameraPermissionsAsync();
 			setHasPermission(status === 'granted');
 		})();
 	}, []);
 
-	// useEffect(() => {
-	// 	if (isFocused == true)
-	// 		canScan.current = true;
-	// 		// setCanScan(true);
-	// 	console.log('STATE IS', canScan);
-	// }, [isFocused]);
+	useEffect(() => {
+			setScanned(false);
+	}, [isFocused]);
 
-	console.log('STATE IS', scanned);
+	const handleBarCodeScanned = async ( scanObj) => {
+		console.log('SCANNED!', scanObj.type, scanObj.data);
+		let data = {};
 
-	const handleBarCodeScanned = ({ type, data }) => {
-		setScanned(true);
-		alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+		let myId = await SecureStore.getItemAsync('id');
+
+		data.user_id = myId;
+		data.value = scanObj.data;
+
+		let response = await axios.post(host + '/student/scan/qrcode/', data)
+		// .then(response => {
+			console.log('RESPONSE', response.data);
+		// })
+		// .catch(err => {
+		// 	console.log('EXCEPTION OCURRED', err);
+		// 	Alert.alert('An error ocurred!');
+		// });
+
+		// console.log('SCAN DATA IS ', data);
+
+		navigation.pop(props.componentId);
+
 	};
 
 	if (hasPermission === null) {
@@ -54,18 +72,31 @@ const Scan = ({ navigation }) => {
 	// <SafeAreaView>
 	// 	<ScrollView>
 			<View style={styles.container}>
-				<BarCodeScanner
-					onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-					style={StyleSheet.absoluteFillObject}
-				/>
-				<Button title={'Tap to Scan Again'} onPress={() => {
-					alert('something');
-					setScanned(false);
-				}} />
-				<Button title={'true'} onPress={() => {
-					alert('something');
-					setScanned(true);
-				}} />
+				<Camera
+          style={{
+            // flex: 1,
+            width: '100%',
+						height: '75%',
+          }}
+          onBarCodeScanned={handleBarCodeScanned}
+        >
+					{/*<Button title={'Tap to Scan Again'} onPress={() => {
+						// alert('something');
+						setScanned(false);
+						// shouldScan = false;
+						// console.log('STATE IS', scanned);
+						// console.log('GLoBAL IS', shouldScan);
+						setSc(false);
+					}} />
+					<Button title={'true'} onPress={() => {
+						// alert('something');
+						setScanned(true);
+						// shouldScan = true;
+						// console.log('STATE IS', scanned);
+						// console.log('GLoBAL IS', shouldScan);
+						setSc(true);
+					}} /> */}
+        </Camera>
 			</View>
 	// 	</ScrollView>
 	// </SafeAreaView>
@@ -78,7 +109,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		// flexDirection: 'column',
-		// justifyContent: 'center',
+		justifyContent: 'center',
 		// padding: 10,
 		// margin: 10,
 	},

@@ -69,11 +69,11 @@ coalition : 6189c94e4a0aea581a39f727
 			return;
 		}
 
-		await axios.post(host + '/students/fetch/password/', data)
+		await axios.post(host + '/students/fetch/password/', data, {rejectUnauthorized: false})
 		.then(async (response) => {
 
 			// // LOG
-			// console.log('RESULT IS HERE')
+			console.log('RESULT IS HERE', response.data);
 			// console.log(JSON.stringify(response.data, null, 2));
 
 			// LOGIN
@@ -81,6 +81,7 @@ coalition : 6189c94e4a0aea581a39f727
 
 				await SecureStore.setItemAsync('logged', 'true');
 				await SecureStore.setItemAsync('id', response.data.data._id);
+				console.log('ID RESPONSE IS', response.data.data._id);
 				await SecureStore.setItemAsync('intraid', response.data.data.intra_id.toString());
 				await SecureStore.setItemAsync('login', response.data.data.login.toString());
 				await SecureStore.setItemAsync('name', response.data.data.name);
@@ -323,6 +324,8 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+		lineHeight: 25,
+		fontSize: 17,
   },
   button: {
     borderRadius: 20,
