@@ -9,6 +9,7 @@ import {
 	ScrollView,
 	Image,
 	Alert,
+	Modal,
 } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useIsFocused } from '@react-navigation/native';
@@ -23,18 +24,19 @@ import '../assets/global';
 const {width, height} = Dimensions.get('screen');
 
 const Home = ({ navigation, route }, props) => {
+  const [modalVisible, setModalVisible] = useState(false);
 	const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
   const [sc, setSc] = useContext(ScanedContext);
 	const [scanValue, setScanValue] = useState('null');
+	const [priority, setPriority] = useState('');
+	const [hintText, setHintText] = useState('');
+	const [hintType, setHintType] = useState(true);
 	const isFocused = useIsFocused();
 	const [name, setName] = useState('');
 	const [image, setImage] = useState('');
 	const [points, setPoints] = useState(0);
 	const [conns, setConns] = useState(0);
 	const [ID, setID] = useState('null');
-	const [intraID, setIntraID] = useState('');
-	// const [, set] = useState(0);
 
   useEffect(() => {
 		let timer = 0;
@@ -43,34 +45,27 @@ const Home = ({ navigation, route }, props) => {
 		SecureStore.getItemAsync('logged').then(logged => {
 
 			if (logged == 'true') {
-				
+
 				console.log('TRUE USER');
 				// GET DATA
-				console.log('ID FIRST IS', ID);
-				SecureStore.getItemAsync('id').then(result => {setID(result); setScanValue(result); myId = result; console.log('ID THEN IS', result);});
-				console.log('ID FIRST NOW IS', ID);
+				SecureStore.getItemAsync('id').then(result => {setID(result); setScanValue(result); myId = result;});
 				SecureStore.getItemAsync('name').then(result => setName(result));
 				SecureStore.getItemAsync('image').then(result => setImage(result));
-				
-				// SecureStore.getItemAsync('points').then(result => setPoints(result));
-				// SecureStore.getItemAsync('connections').then(result => setConns(result));
-				// SecureStore.getItemAsync('intraid').then(result => setIntraID(result));
-				
-				loadData(myId);
+
+				loadScore(myId);
 
 				timer = setInterval(() => {
 					console.log('fire again!', timer);
-					loadData(myId);
-				}, 5 * 1000);
+					loadScore(myId);
+				}, 5 * 1000 * 2.5);
 
 			} else {
-				
+
 				navigation.navigate('Login');
-				
+
 			}
 
 		});
-
 
 		if (isFocused == false) {
 			clearInterval(timer);
@@ -90,31 +85,74 @@ const Home = ({ navigation, route }, props) => {
     })();
   }, []);
 
-	const loadData = (id) => {
+	const loadScore = (id) => {
 		if (id && id != undefined && id != null && id != "null") {
 			axios.post(host + '/students/fetch/byId/', {"id" :id})
 			.then((response) => {
-				console.log('PINGER LAUNCHED');
+				console.log('PINGER LAUNCHED', response.data);
 
 				if (response.data.success == true) {
+
 					setConns(response.data.data.connections);
 					SecureStore.setItemAsync('connections', response.data.data.connections.toString());
 					console.log('CONS', response.data.data.connections);
-					setPoints(response.data.data.points);
-					SecureStore.setItemAsync('points', response.data.data.points.toString());
-					console.log('POINTS', response.data.data.points);
 
+					let total = 0;
+					if (response.data.data.team) {
+
+						total = parseInt(response.data.data.points) + parseInt(response.data.data.team.points);
+						setPriority(response.data.data.team.priority);
+					} else {
+
+						total = response.data.data.points;
+					}
+
+					setPoints(total);
+					SecureStore.setItemAsync('points', total.toString());
+					console.log('POINTS', total);
 				} else if (response.data.success == false) {
+
 					Alert.alert(response.data.error, ID);
 				}
 			})
 			.catch((error) => {
 				// recursive
-				// loadData();
-				console.log('LOAD MESSAGES CATCH', error);
+				// loadScore();
+				console.log('LOAD SCORE CATCH', error);
 			});
 		} else
-			console.log('WHOOPS', id);
+			console.log('WHOOPS SCORE', id);
+  }
+
+	const loadHint = (p) => {
+		// if (p && p != undefined && p != null) {
+			axios.post(host + '/huntFlag/getByPriority/', {"priority" :p})
+			.then((response) => {
+
+				console.log('PINGER LAUNCHED', response.data);
+
+				if (response.data.success == true) {
+
+					setHintText(response.data.data.next_place);
+					let type = response.data.data.next_place.split('.');
+					if (type[type.length - 1] == 'jpg') {
+
+						setHintType(false);
+					} else
+						setHintType(true);
+					setModalVisible(true);
+				} else if (response.data.success == false) {
+
+					Alert.alert(response.data.error);
+				}
+			})
+			.catch((error) => {
+				// recursive
+				// loadScore();
+				console.log('LOAD HINTS CATCH', error);
+			});
+		// } else
+		// 	console.log('WHOOPS HINT', p);
   }
 
   if (hasPermission === null) {
@@ -128,6 +166,35 @@ const Home = ({ navigation, route }, props) => {
 	<SafeAreaView>
 		<ScrollView>
 			<View style={styles.container}>
+				{/* INFO MODAL */}
+				<Modal
+					animationType="slide"
+					transparent={true}
+					visible={modalVisible}
+					onRequestClose={() => {
+						setModalVisible(!modalVisible);
+					}}>
+					<View style={styles.centeredView}>
+						<View style={styles.modalView}>
+							{
+								hintType ?
+								<Text style={styles.modalText}>
+									{ hintText }
+								</Text> : 
+								<Image
+									resizeMode='contain' source={{ uri:hintText }}
+									style={{ width: '100%', height: 200, backgroundColor: 'transparent', }}
+								/>
+							}
+							<TouchableOpacity
+								style={[styles.button, styles.buttonClose]}
+								onPress={() => setModalVisible(!modalVisible)}>
+								<Text style={styles.textStyle}>CLOSE</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</Modal>
+
 				{/* PROFILE */}
 				<View
 					style={{
@@ -145,23 +212,7 @@ const Home = ({ navigation, route }, props) => {
 				</View>
 				<Text style={{ marginTop: 5, marginBottom: 7.5, color: '#333', fontSize: 20, }}>{ name }</Text>
 
-				{/* DEBUG BUTTON */}
-				{/* <TouchableOpacity
-					style={styles.blackButton}
-					onPress={() => {
-            SecureStore.getItemAsync('id').then(res => console.log('DEBUG', res));
-					}}
-					activeOpacity={ 0.7 }
-				>
-					<Text style={{ color: 'white', fontSize: 20, }} >DEBUG</Text>
-				</TouchableOpacity> */}
-
-				{/* BARCODE */}
-				{/* <QRCode
-					size={200}
-					content={''}
-					padding={1.5}
-				/> */}
+				{/* PERSONAL QR */}
 				<View style={{
 					marginVertical: 10,
 				}}>
@@ -205,17 +256,32 @@ const Home = ({ navigation, route }, props) => {
 					</View>
 				</View>
 
-				{/* SCAN BUTTON */}
-				<TouchableOpacity
-					style={styles.blackButton}
-					onPress={() => {
-            setSc(false);
-						navigation.navigate('Scan');
-					}}
-					activeOpacity={ 0.7 }
-				>
-					<Text style={{ color: 'white', fontSize: 20, }} >SCAN QR CODE</Text>
-				</TouchableOpacity>
+				{/* ACTION BUTTONS */}
+				<View style={{ flexDirection: 'row', }}>
+					{/* SCAN BUTTON */}
+					<TouchableOpacity
+						style={styles.blackButton}
+						onPress={() => {
+							setSc(false);
+							navigation.navigate('Scan');
+						}}
+						activeOpacity={ 0.7 }
+						>
+						<Text style={{ color: 'white', fontSize: 20, }} >SCAN QR CODE</Text>
+					</TouchableOpacity>
+
+					{/* HINT BUTTON */}
+					<TouchableOpacity
+						style={styles.blackButton}
+						onPress={() => {
+							loadHint(priority);
+							// setModalVisible(!modalVisible);
+						}}
+						activeOpacity={ 0.7 }
+						>
+						<Text style={{ color: 'white', fontSize: 20, }} >CURRENT FLAG</Text>
+					</TouchableOpacity>
+				</View>
 
 				{/* LOGOUT BUTTON */}
 				<TouchableOpacity
@@ -242,9 +308,10 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 		padding: 10,
 		// margin: 10,
-		// justifyContent: 'center',
+		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#eee',
+		position: 'relative',
   },
 	points: {
 		width: width / 2 - 17.5,
@@ -263,11 +330,54 @@ const styles = StyleSheet.create({
 	},
 	blackButton: {
 		marginVertical: 7.5,
-		paddingVertical: 10,
-		paddingHorizontal: 20,
+		marginHorizontal: 5,
+		paddingVertical: 7.5,
+		paddingHorizontal: 10,
 		backgroundColor: '#222',
 		borderRadius: 5,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
+	// modal
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    // alignItems: 'center',
+    marginTop: 22,
+		// width: '80%',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+		lineHeight: 25,
+		fontSize: 17,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonClose: {
+    backgroundColor: '#0f0f0f',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });

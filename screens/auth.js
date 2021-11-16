@@ -298,7 +298,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textDecorationLine: "underline",
   },
-
 	// modal
   centeredView: {
     flex: 1,

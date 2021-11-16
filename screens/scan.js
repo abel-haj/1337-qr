@@ -1,29 +1,21 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	Alert,
 	Dimensions,
 	Text,
 	View,
 	StyleSheet,
-	SafeAreaView,
-	ScrollView,
-	Button,
 } from 'react-native';
-// import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useIsFocused } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import { Camera } from 'expo-camera';
 import axios from 'axios';
 
-const {width, height} = Dimensions.get('screen');
-import { ScanedContext } from './ScanedContext';
 import '../assets/global';
 
 const Scan = ({ navigation }, props) => {
 	const [hasPermission, setHasPermission] = useState(null);
 	const [scanned, setScanned] = useState(false);
-  const [sc, setSc] = useContext(ScanedContext);
-	const canScan = useRef(true);
 	const isFocused = useIsFocused();
 	
 	useEffect(() => {
@@ -34,13 +26,30 @@ const Scan = ({ navigation }, props) => {
 	}, []);
 
 	useEffect(() => {
+		if (isFocused == true)
 			setScanned(false);
+		if (isFocused == true)
+			console.log('CAN SCAN', !scanned);
 	}, [isFocused]);
 
+	function delay(time) {
+		return new Promise(function(resolve, reject) {
+			setTimeout(() => resolve(), time);
+		});
+	}
+	
 	const handleBarCodeScanned = async ( scanObj) => {
 		console.log('SCANNED!', scanObj.type, scanObj.data);
 		let data = {};
+		
+		await delay(200);
+		
+		if (scanned == true)
+			return;
 
+		console.log('SCANNED 2!', scanObj.type, scanObj.data);
+		
+		setScanned(true);
 		let myId = await SecureStore.getItemAsync('id');
 
 		data.user_id = myId;
@@ -50,9 +59,9 @@ const Scan = ({ navigation }, props) => {
 		// .then(response => {
 			console.log('RESPONSE', response.data);
 			if (response.data.success == false)
-				Alert.alert(response.data.error)
-			// else if (response.data.success == true)
-			// 	Alert.alert(response.data.data)
+				Alert.alert(response.data.error);
+			else if (response.data.success == true)
+				Alert.alert(';)');
 		// })
 		// .catch(err => {
 		// 	console.log('EXCEPTION OCURRED', err);
