@@ -57,7 +57,7 @@ const Home = ({ navigation, route }, props) => {
 				timer = setInterval(() => {
 					console.log('fire again!', timer);
 					loadScore(myId);
-				}, 5 * 1000 * 2.5);
+				}, 5 * 1000);
 
 			} else {
 
